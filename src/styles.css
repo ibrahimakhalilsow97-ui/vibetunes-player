@@ -142,3 +142,75 @@
     color: var(--color-foreground);
   }
 }
+
+/* ===== Nour — thème coranique ===== */
+:root {
+  --radius: 1rem;
+  --background: oklch(0.975 0.012 150);
+  --foreground: oklch(0.27 0.04 160);
+  --card: oklch(0.99 0.006 95);
+  --card-foreground: oklch(0.27 0.04 160);
+  --popover: oklch(0.99 0.006 95);
+  --popover-foreground: oklch(0.27 0.04 160);
+  --primary: oklch(0.42 0.08 162);
+  --primary-foreground: oklch(0.98 0.01 95);
+  --secondary: oklch(0.93 0.03 150);
+  --secondary-foreground: oklch(0.32 0.06 162);
+  --muted: oklch(0.945 0.018 140);
+  --muted-foreground: oklch(0.5 0.03 160);
+  --accent: oklch(0.93 0.05 88);
+  --accent-foreground: oklch(0.4 0.07 75);
+  --border: oklch(0.9 0.02 140);
+  --input: oklch(0.9 0.02 140);
+  --ring: oklch(0.42 0.08 162);
+  --gold: oklch(0.74 0.11 82);
+  --gold-soft: oklch(0.9 0.06 88);
+  --pattern-ink: oklch(0.42 0.08 162 / 0.07);
+  --shadow-soft: 0 8px 28px -14px oklch(0.35 0.06 162 / 0.3);
+  --gradient-hero: linear-gradient(135deg, oklch(0.38 0.08 162), oklch(0.3 0.06 170));
+}
+.dark {
+  --background: oklch(0.19 0.022 170);
+  --foreground: oklch(0.93 0.015 95);
+  --card: oklch(0.235 0.025 168);
+  --card-foreground: oklch(0.93 0.015 95);
+  --popover: oklch(0.235 0.025 168);
+  --popover-foreground: oklch(0.93 0.015 95);
+  --primary: oklch(0.72 0.09 160);
+  --primary-foreground: oklch(0.18 0.03 165);
+  --secondary: oklch(0.29 0.03 165);
+  --secondary-foreground: oklch(0.9 0.02 95);
+  --muted: oklch(0.27 0.025 165);
+  --muted-foreground: oklch(0.7 0.025 150);
+  --accent: oklch(0.32 0.05 85);
+  --accent-foreground: oklch(0.88 0.08 88);
+  --border: oklch(1 0 0 / 9%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(0.72 0.09 160);
+  --gold: oklch(0.78 0.11 85);
+  --gold-soft: oklch(0.35 0.05 85);
+  --pattern-ink: oklch(0.8 0.08 85 / 0.05);
+  --shadow-soft: 0 8px 28px -14px oklch(0 0 0 / 0.6);
+  --gradient-hero: linear-gradient(135deg, oklch(0.3 0.05 165), oklch(0.24 0.035 170));
+}
+@theme inline {
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+  --font-arabic: "Amiri", serif;
+  --font-display: "Cormorant Garamond", serif;
+  --font-sans: "Manrope", system-ui, sans-serif;
+  --shadow-soft: var(--shadow-soft);
+}
+body { font-family: var(--font-sans); }
+@utility bg-hero { background-image: var(--gradient-hero); }
+@utility islamic-pattern {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'%3E%3Cg fill='none' stroke='black' stroke-width='1'%3E%3Cpath d='M28 4l7 17 17 7-17 7-7 17-7-17-17-7 17-7z'/%3E%3Crect x='16' y='16' width='24' height='24' transform='rotate(45 28 28)'/%3E%3C/g%3E%3C/svg%3E");
+  mask-image: none;
+}
+@utility pattern-layer {
+  position: absolute; inset: 0; pointer-events: none;
+  background-color: var(--pattern-ink);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'%3E%3Cg fill='none' stroke='black' stroke-width='1'%3E%3Cpath d='M28 4l7 17 17 7-17 7-7 17-7-17-17-7 17-7z'/%3E%3Crect x='16' y='16' width='24' height='24' transform='rotate(45 28 28)'/%3E%3C/g%3E%3C/svg%3E") repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'%3E%3Cg fill='none' stroke='black' stroke-width='1'%3E%3Cpath d='M28 4l7 17 17 7-17 7-7 17-7-17-17-7 17-7z'/%3E%3Crect x='16' y='16' width='24' height='24' transform='rotate(45 28 28)'/%3E%3C/g%3E%3C/svg%3E") repeat;
+}
