@@ -10,33 +10,115 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as FavorisRouteImport } from './routes/favoris'
+import { Route as HistoriqueRouteImport } from './routes/historique'
+import { Route as RechercheRouteImport } from './routes/recherche'
+import { Route as ReglagesRouteImport } from './routes/reglages'
+import { Route as SouratesRouteImport } from './routes/sourates'
+import { Route as SourateIdRouteImport } from './routes/sourate.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FavorisRoute = FavorisRouteImport.update({
+  id: '/favoris',
+  path: '/favoris',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HistoriqueRoute = HistoriqueRouteImport.update({
+  id: '/historique',
+  path: '/historique',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RechercheRoute = RechercheRouteImport.update({
+  id: '/recherche',
+  path: '/recherche',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReglagesRoute = ReglagesRouteImport.update({
+  id: '/reglages',
+  path: '/reglages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SouratesRoute = SouratesRouteImport.update({
+  id: '/sourates',
+  path: '/sourates',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SourateIdRoute = SourateIdRouteImport.update({
+  id: '/sourate/$id',
+  path: '/sourate/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/favoris': typeof FavorisRoute
+  '/historique': typeof HistoriqueRoute
+  '/recherche': typeof RechercheRoute
+  '/reglages': typeof ReglagesRoute
+  '/sourates': typeof SouratesRoute
+  '/sourate/$id': typeof SourateIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/favoris': typeof FavorisRoute
+  '/historique': typeof HistoriqueRoute
+  '/recherche': typeof RechercheRoute
+  '/reglages': typeof ReglagesRoute
+  '/sourates': typeof SouratesRoute
+  '/sourate/$id': typeof SourateIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/favoris': typeof FavorisRoute
+  '/historique': typeof HistoriqueRoute
+  '/recherche': typeof RechercheRoute
+  '/reglages': typeof ReglagesRoute
+  '/sourates': typeof SouratesRoute
+  '/sourate/$id': typeof SourateIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/favoris'
+    | '/historique'
+    | '/recherche'
+    | '/reglages'
+    | '/sourates'
+    | '/sourate/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/favoris'
+    | '/historique'
+    | '/recherche'
+    | '/reglages'
+    | '/sourates'
+    | '/sourate/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/favoris'
+    | '/historique'
+    | '/recherche'
+    | '/reglages'
+    | '/sourates'
+    | '/sourate/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  FavorisRoute: typeof FavorisRoute
+  HistoriqueRoute: typeof HistoriqueRoute
+  RechercheRoute: typeof RechercheRoute
+  ReglagesRoute: typeof ReglagesRoute
+  SouratesRoute: typeof SouratesRoute
+  SourateIdRoute: typeof SourateIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +130,59 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/favoris': {
+      id: '/favoris'
+      path: '/favoris'
+      fullPath: '/favoris'
+      preLoaderRoute: typeof FavorisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/historique': {
+      id: '/historique'
+      path: '/historique'
+      fullPath: '/historique'
+      preLoaderRoute: typeof HistoriqueRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recherche': {
+      id: '/recherche'
+      path: '/recherche'
+      fullPath: '/recherche'
+      preLoaderRoute: typeof RechercheRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reglages': {
+      id: '/reglages'
+      path: '/reglages'
+      fullPath: '/reglages'
+      preLoaderRoute: typeof ReglagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sourates': {
+      id: '/sourates'
+      path: '/sourates'
+      fullPath: '/sourates'
+      preLoaderRoute: typeof SouratesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sourate/$id': {
+      id: '/sourate/$id'
+      path: '/sourate/$id'
+      fullPath: '/sourate/$id'
+      preLoaderRoute: typeof SourateIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  FavorisRoute: FavorisRoute,
+  HistoriqueRoute: HistoriqueRoute,
+  RechercheRoute: RechercheRoute,
+  ReglagesRoute: ReglagesRoute,
+  SouratesRoute: SouratesRoute,
+  SourateIdRoute: SourateIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
