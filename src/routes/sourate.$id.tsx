@@ -63,7 +63,7 @@ function Reader() {
         <p className="text-xs uppercase tracking-[0.2em] text-gold">Sourate {surah.number}</p>
         <h1 className="mt-4 font-arabic text-4xl leading-[1.8]">{surah.name}</h1>
         <p className="mt-1 font-display text-2xl">{surah.englishName}</p>
-        {(() => null)()}
+        <p className="mt-1 text-sm opacity-80">{surah.englishNameTranslation} · {revelationFr(surah.revelationType)} · {surah.numberOfAyahs} versets</p>
         <button onClick={() => play("surah", surahAudio(id))} className="relative mt-5 inline-flex items-center gap-2 rounded-full bg-gold px-5 py-2.5 text-sm font-semibold text-primary dark:text-primary-foreground">
           {playing === "surah" ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
           {playing === "surah" ? "Pause" : "Écouter la sourate"}

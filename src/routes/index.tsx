@@ -93,7 +93,7 @@ function Home() {
       <section>
         <h2 className="mb-4 font-display text-2xl font-semibold text-primary">Sourates populaires</h2>
         <div className="grid gap-3 md:grid-cols-2">
-          {data ? popular.map((n) => <SurahCard key={n} s={data[n - 1]} />) : <SurahSkeleton />}
+          {data ? popular.map((n) => data[n - 1] && <SurahCard key={n} s={data[n - 1]!} />) : <SurahSkeleton />}
         </div>
       </section>
     </div>
