@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VibeTunes — Lecteur musical</title>
+  <meta name="description" content="VibeTunes — une interface musicale moderne et immersive." />
+  <style>
+    /* ===========================================================
+       VibeTunes — Design system (vanilla CSS, no framework)
+       =========================================================== */
+    :root {
+      /* Dark base palette */
+      --bg-0: #0a0a14;
+      --bg-1: #11111f;
+      --surface: rgba(255, 255, 255, 0.04);
+      --surface-strong: rgba(255, 255, 255, 0.07);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-strong: rgba(255, 255, 255, 0.16);
+
+      --text: #f4f4ff;
+      --text-soft: #b9b9d6;
+      --text-mute: #7c7c9c;
+
+      /* Accent: pink -> blue */
+      --accent-pink: #ff5ea0;
+      --accent-blue: #4f7bff;
+      --accent: #6ec1ff;
+      --accent-grad: linear-gradient(135deg, var(--accent-pink), var(--accent-blue));
+      --accent-grad-soft: linear-gradient(135deg, rgba(255, 94, 160, 0.18), rgba(79, 123, 255, 0.18));
+
+      --radius-sm: 10px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+      --radius-pill: 999px;
+
+      --shadow-soft: 0 18px 50px rgba(0, 0, 0, 0.45);
+      --shadow-glow: 0 0 40px rgba(110, 193, 255, 0.25);
+
+      --font: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: var(--font);
+      color: var(--text);
+      min-height: 100vh;
+      background:
+        radial-gradient(1200px 600px at 15% -10%, rgba(255, 94, 160, 0.18), transparent 60%),
+        radial-gradient(1100px 700px at 100% 0%, rgba(79, 123, 255, 0.20), transparent 55%),
+        radial-gradient(900px 700px at 50% 120%, rgba(110, 193, 255, 0.12), transparent 60%),
+        linear-gradient(180deg, var(--bg-1), var(--bg-0));
+      background-attachment: fixed;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: rgba(255, 94, 160, 0.35); }
+
+    /* ---------- Layout shell ---------- */
+    .shell {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 28px 20px 64px;
+    }
+
+    /* ---------- Header ---------- */
+    #app-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    #app-title {
+      font-size: clamp(2rem, 6vw, 2.9rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: var(--accent-grad);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+    }
+    #app-title .dot {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--accent-grad);
+      box-shadow: 0 0 16px rgba(255, 94, 160, 0.7);
+    }
+    #app-tagline {
+      margin-top: 6px;
+      color: var(--text-mute);
+      font-size: 0.9rem;
+      letter-spacing: 0.04em;
+    }
+    #search-bar {
+      margin: 18px auto 0;
+      max-width: 460px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-pill);
+      backdrop-filter: blur(14px);
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+    #search-bar:focus-within {
+      border-color: var(--border-strong);
+      box-shadow: 0 0 0 4px rgba(110, 193, 255, 0.12);
+    }
+    #search-bar svg { flex: 0 0 auto; color: var(--text-mute); }
+    #search-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+    #search-input::placeholder { color: var(--text-mute); }
+
+    /* ---------- Player card ---------- */
+    #player-card {
+      position: relative;
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 28px;
+      padding: 26px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow-soft);
+      overflow: hidden;
+    }
+    #player-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: var(--accent-grad-soft);
+      opacity: 0.5;
+      pointer-events: none;
+    }
+    #player-card > * { position: relative; }
+
+    #album-cover {
+      width: 220px; height: 220px;
+      border-radius: var(--radius-md);
+      object-fit: cover;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--border-strong);
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+    }
+    #player-card.is-playing #album-cover {
+      box-shadow: 0 16px 50px rgba(0, 0, 0, 0.5), var(--shadow-glow);
+    }
+
+    #player-meta { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+    #track-eyebrow {
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    #track-title {
+      font-size: clamp(1.4rem, 4vw, 1.9rem);
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #track-artist {
+      margin-top: 4px;
+      color: var(--text-soft);
+      font-size: 1rem;
+    }
+
+    /* progress */
+    #progress-wrap { margin-top: 22px; width: 100%; }
+    #progress-bar {
+      position: relative;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      overflow: hidden;
+    }
+    #progress-fill {
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 0%;
+      background: var(--accent-grad);
+      border-radius: var(--radius-pill);
+      transition: width 0.2s linear;
+    }
+    #progress-times {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      font-size: 0.78rem;
+      color: var(--text-mute);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* controls */
+    #controls {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-top: 22px;
+    }
+    .ctrl-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border);
+      background: var(--surface-strong);
+      color: var(--text);
+      border-radius: var(--radius-pill);
+      width: 50px; height: 50px;
+      cursor: pointer;
+      transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+    .ctrl-btn:hover { transform: translateY(-2px); border-color: var(--border-strong); }
+    .ctrl-btn:active { transform: translateY(0) scale(0.96); }
+    .ctrl-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    #btn-play, #btn-pause {
+      width: 62px; height: 62px;
+      background: var(--accent-grad);
+      border: none;
+      color: #fff;
+      box-shadow: 0 10px 30px rgba(255, 94, 160, 0.35);
+    }
+    #btn-play:hover, #btn-pause:hover { box-shadow: 0 14px 38px rgba(255, 94, 160, 0.5); }
+    #btn-pause { display: none; }
+    #player-card.is-playing #btn-play { display: none; }
+    #player-card.is-playing #btn-pause { display: inline-flex; }
+
+    .ctrl-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+    /* ---------- Top Tracks ---------- */
+    #top-tracks-section { margin-top: 40px; }
+    #top-tracks-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    #top-tracks-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    #top-tracks-hint { color: var(--text-mute); font-size: 0.8rem; }
+
+    #top-tracks-list {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      padding: 6px 4px 18px;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+    }
+    #top-tracks-list::-webkit-scrollbar { height: 8px; }
+    #top-tracks-list::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.18); border-radius: 99px; }
+
+    .track-card {
+      flex: 0 0 auto;
+      width: 168px;
+      scroll-snap-align: start;
+      cursor: pointer;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      transition: transform 0.22s ease, border-color 0.22s ease, background 0.22s ease;
+    }
+    .track-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--border-strong);
+      background: var(--surface-strong);
+    }
+    .track-card.is-active {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(110, 193, 255, 0.25);
+    }
+    .track-card .cover-wrap {
+      position: relative;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      aspect-ratio: 1 / 1;
+    }
+    .track-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .track-card .cover-wrap::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 55%, rgba(0, 0, 0, 0.45));
+      opacity: 0;
+      transition: opacity 0.22s ease;
+    }
+    .track-card:hover .cover-wrap::after { opacity: 1; }
+    .track-card .rank {
+      position: absolute;
+      top: 8px; left: 8px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: var(--radius-pill);
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(6px);
+      color: #fff;
+    }
+    .track-card .t-title {
+      margin-top: 10px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .track-card .t-artist {
+      color: var(--text-mute);
+      font-size: 0.8rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .track-card.hidden { display: none; }
+
+    /* ---------- Footer ---------- */
+    #app-footer {
+      margin-top: 40px;
+      text-align: center;
+      color: var(--text-mute);
+      font-size: 0.78rem;
+    }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 640px) {
+      .shell { padding: 20px 14px 48px; }
+      #player-card {
+        grid-template-columns: 1fr;
+        text-align: center;
+        padding: 22px;
+        gap: 18px;
+      }
+      #album-cover {
+        width: 100%;
+        max-width: 240px;
+        height: auto;
+        aspect-ratio: 1 / 1;
+        margin: 0 auto;
+      }
+      #player-meta { align-items: center; }
+      #track-title, #track-artist { white-space: normal; }
+      #controls { justify-content: center; }
+      .track-card { width: 150px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <!-- ===== Header ===== -->
+    <header id="app-header">
+      <h1 id="app-title"><span class="dot" aria-hidden="true"></span>VibeTunes</h1>
+      <p id="app-tagline">Votre bande-son, vos vibrations.</p>
+      <div id="search-bar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="7"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <label for="search-input" class="ctrl-label">Rechercher une musique</label>
+        <input id="search-input" type="search" placeholder="Rechercher un titre ou un artiste…" autocomplete="off" />
+      </div>
+    </header>
+
+    <!-- ===== Player ===== -->
+    <main>
+      <section id="player-card" aria-label="Lecteur de musique">
+        <img id="album-cover" src="/images/cover1.jpg" alt="Pochette de la chanson en cours" />
+
+        <div id="player-meta">
+          <div id="track-eyebrow">En lecture</div>
+          <h2 id="track-title">Neon Skyline</h2>
+          <p id="track-artist">Aria Vesper</p>
+
+          <div id="progress-wrap">
+            <div id="progress-bar" role="slider" aria-label="Progression de la piste" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
+              <div id="progress-fill"></div>
+            </div>
+            <div id="progress-times">
+              <span id="progress-time-current">0:00</span>
+              <span id="progress-time-total">3:00</span>
+            </div>
+          </div>
+
+          <div id="controls">
+            <button id="btn-prev" class="ctrl-btn" type="button" aria-label="Piste précédente">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 5h2v14H6zM20 5v14l-10-7z"/></svg>
+            </button>
+            <button id="btn-play" class="ctrl-btn" type="button" aria-label="Lecture">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+            <button id="btn-pause" class="ctrl-btn" type="button" aria-label="Pause">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>
+            </button>
+            <button id="btn-next" class="ctrl-btn" type="button" aria-label="Piste suivante">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16 5h2v14h-2zM4 5l10 7-10 7z"/></svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Top Tracks ===== -->
+      <section id="top-tracks-section" aria-label="Top Tracks">
+        <div id="top-tracks-header">
+          <h3 id="top-tracks-title">Top Tracks</h3>
+          <span id="top-tracks-hint">Glissez pour explorer →</span>
+        </div>
+        <div id="top-tracks-list" role="list"></div>
+      </section>
+    </main>
+
+    <footer id="app-footer">
+      VibeTunes · interface de démonstration — HTML, CSS & JavaScript pur.
+    </footer>
+  </div>
+
+  <script>
+    /* ===========================================================
+       VibeTunes — App logic (vanilla JS, no framework)
+       =========================================================== */
+    (function () {
+      "use strict";
+
+      // --- Track catalogue ---
+      var TRACKS = [
+        { id: "t1", title: "Neon Skyline",       artist: "Aria Vesper",   cover: "/images/cover1.jpg", duration: 180 },
+        { id: "t2", title: "Midnight Silhouette", artist: "Kael Drift",    cover: "/images/cover2.jpg", duration: 212 },
+        { id: "t3", title: "Liquid Horizon",     artist: "Mira Solène",  cover: "/images/cover3.jpg", duration: 165 },
+        { id: "t4", title: "Sunset Grid",         artist: "The Velvets",   cover: "/images/cover4.jpg", duration: 198 },
+        { id: "t5", title: "Echoes in Bloom",     artist: "Noé Akira",     cover: "/images/cover1.jpg", duration: 224 }
+      ];
+
+      // --- State ---
+      var currentIndex = 0;
+      var isPlaying = false;
+      var progress = 0;            // 0..1
+      var tickHandle = null;
+      var TICK_MS = 250;
+
+      // --- Element refs ---
+      var el = {
+        playerCard:    document.getElementById("player-card"),
+        albumCover:    document.getElementById("album-cover"),
+        trackTitle:    document.getElementById("track-title"),
+        trackArtist:   document.getElementById("track-artist"),
+        trackEyebrow:  document.getElementById("track-eyebrow"),
+        btnPrev:       document.getElementById("btn-prev"),
+        btnPlay:       document.getElementById("btn-play"),
+        btnPause:      document.getElementById("btn-pause"),
+        btnNext:       document.getElementById("btn-next"),
+        progressBar:   document.getElementById("progress-bar"),
+        progressFill:  document.getElementById("progress-fill"),
+        timeCurrent:   document.getElementById("progress-time-current"),
+        timeTotal:     document.getElementById("progress-time-total"),
+        topTracksList: document.getElementById("top-tracks-list"),
+        searchInput:   document.getElementById("search-input")
+      };
+
+      // --- Helpers ---
+      function fmt(sec) {
+        sec = Math.max(0, Math.round(sec));
+        var m = Math.floor(sec / 60);
+        var s = sec % 60;
+        return m + ":" + (s < 10 ? "0" + s : s);
+      }
+
+      function trackById(id) {
+        for (var i = 0; i < TRACKS.length; i++) if (TRACKS[i].id === id) return TRACKS[i];
+        return null;
+      }
+
+      // --- Rendering ---
+      function loadTrack(index) {
+        currentIndex = (index + TRACKS.length) % TRACKS.length;
+        var t = TRACKS[currentIndex];
+        el.albumCover.src = t.cover;
+        el.albumCover.alt = "Pochette de " + t.title + " — " + t.artist;
+        el.trackTitle.textContent = t.title;
+        el.trackArtist.textContent = t.artist;
+        el.timeTotal.textContent = fmt(t.duration);
+        progress = 0;
+        renderProgress();
+        syncActiveCard();
+      }
+
+      function renderProgress() {
+        var pct = Math.min(100, Math.max(0, progress * 100));
+        el.progressFill.style.width = pct + "%";
+        el.progressBar.setAttribute("aria-valuenow", String(Math.round(pct)));
+        var t = TRACKS[currentIndex];
+        el.timeCurrent.textContent = fmt(progress * t.duration);
+      }
+
+      function syncActiveCard() {
+        var active = TRACKS[currentIndex].id;
+        var cards = el.topTracksList.querySelectorAll(".track-card");
+        for (var i = 0; i < cards.length; i++) {
+          cards[i].classList.toggle("is-active", cards[i].getAttribute("data-id") === active);
+        }
+      }
+
+      // --- Playback simulation (no real audio file) ---
+      function startTick() {
+        stopTick();
+        tickHandle = setInterval(function () {
+          var t = TRACKS[currentIndex];
+          progress += (TICK_MS / 1000) / t.duration;
+          if (progress >= 1) {
+            progress = 0;
+            nextTrack();
+            return;
+          }
+          renderProgress();
+        }, TICK_MS);
+      }
+      function stopTick() { if (tickHandle) { clearInterval(tickHandle); tickHandle = null; } }
+
+      function play() {
+        isPlaying = true;
+        el.playerCard.classList.add("is-playing");
+        el.trackEyebrow.textContent = "En lecture";
+        startTick();
+      }
+      function pause() {
+        isPlaying = false;
+        el.playerCard.classList.remove("is-playing");
+        el.trackEyebrow.textContent = "En pause";
+        stopTick();
+      }
+      function togglePlay() { if (isPlaying) pause(); else play(); }
+      function nextTrack() { loadTrack(currentIndex + 1); if (isPlaying) startTick(); }
+      function prevTrack() { loadTrack(currentIndex - 1); if (isPlaying) startTick(); }
+
+      // --- Seek ---
+      function seekFromEvent(e) {
+        var rect = el.progressBar.getBoundingClientRect();
+        var x = (e.clientX || (e.touches && e.touches[0].clientX) || 0) - rect.left;
+        progress = Math.min(1, Math.max(0, x / rect.width));
+        renderProgress();
+      }
+
+      // --- Build Top Tracks list ---
+      function buildTopTracks() {
+        var html = "";
+        for (var i = 0; i < TRACKS.length; i++) {
+          var t = TRACKS[i];
+          html += '<article class="track-card" role="listitem" id="track-card-' + t.id + '" data-id="' + t.id + '" tabindex="0" aria-label="Lire ' + t.title + ' de ' + t.artist + '">' +
+                    '<div class="cover-wrap">' +
+                      '<span class="rank">' + (i + 1) + '</span>' +
+                      '<img id="track-cover-' + t.id + '" src="' + t.cover + '" alt="Pochette de ' + t.title + '" loading="lazy" />' +
+                    '</div>' +
+                    '<div class="t-title" id="track-name-' + t.id + '">' + t.title + '</div>' +
+                    '<div class="t-artist" id="track-artist-' + t.id + '">' + t.artist + '</div>' +
+                  '</article>';
+        }
+        el.topTracksList.innerHTML = html;
+      }
+
+      // --- Search filter ---
+      function filterTopTracks(query) {
+        var q = query.trim().toLowerCase();
+        var cards = el.topTracksList.querySelectorAll(".track-card");
+        for (var i = 0; i < cards.length; i++) {
+          var id = cards[i].getAttribute("data-id");
+          var t = trackById(id);
+          var match = !q || t.title.toLowerCase().indexOf(q) !== -1 || t.artist.toLowerCase().indexOf(q) !== -1;
+          cards[i].classList.toggle("hidden", !match);
+        }
+      }
+
+      // --- Wire events ---
+      el.btnPlay.addEventListener("click", play);
+      el.btnPause.addEventListener("click", pause);
+      el.btnNext.addEventListener("click", nextTrack);
+      el.btnPrev.addEventListener("click", prevTrack);
+
+      el.progressBar.addEventListener("click", seekFromEvent);
+      el.progressBar.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowRight") { progress = Math.min(1, progress + 0.05); renderProgress(); }
+        if (e.key === "ArrowLeft")  { progress = Math.max(0, progress - 0.05); renderProgress(); }
+      });
+
+      el.topTracksList.addEventListener("click", function (e) {
+        var card = e.target.closest(".track-card");
+        if (!card) return;
+        var t = trackById(card.getAttribute("data-id"));
+        if (!t) return;
+        var idx = TRACKS.indexOf(t);
+        loadTrack(idx);
+        play();
+      });
+      el.topTracksList.addEventListener("keydown", function (e) {
+        var card = e.target.closest ? e.target.closest(".track-card") : null;
+        if (card && (e.key === "Enter" || e.key === " ")) {
+          e.preventDefault();
+          card.click();
+        }
+      });
+
+      el.searchInput.addEventListener("input", function () {
+        filterTopTracks(el.searchInput.value);
+      });
+
+      // keyboard: space toggles play when search not focused
+      document.addEventListener("keydown", function (e) {
+        if (e.code === "Space" && document.activeElement !== el.searchInput) {
+          e.preventDefault();
+          togglePlay();
+        }
+      });
+
+      // --- Init ---
+      buildTopTracks();
+      loadTrack(0);
+    })();
+  </script>
+</body>
+</html>
